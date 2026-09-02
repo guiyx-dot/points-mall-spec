@@ -2,12 +2,13 @@ import { useMemo, useState } from 'react'
 import { ProductIcon } from '../icons'
 import { BuyPreview } from './buy-preview'
 import { AccountViewButton } from './accounts'
+import { EquityPicker } from './equity-picker'
 import {
   APPROVAL_RECORDS,
   DEDICATED_SKUS,
   FEE_PCT,
+  FEE_RATE,
   GENERAL_FEE_PCT,
-  GENERAL_FEE_RATE,
   UNIT_PRICE,
   approvalById,
   dedicatedLabel,
@@ -17,12 +18,44 @@ import {
   planFromRows,
   quote,
   type ApprovalTab,
-  type ImportRow,
   type PurchaseKind,
 } from './model'
 import { maskPhone, useAdmin } from './store'
 
 const ACCOUNT_BALANCE = 50000
+
+function FeeSplitBar({
+  feePct,
+  merchantPct,
+  locked,
+  disabled,
+  onChange,
+}: {
+  feePct: number
+  merchantPct: number
+  locked?: boolean
+  disabled?: boolean
+  onChange?: (value: number) => void
+}) {
+  const userPct = feePct - merchantPct
+  return (
+    <>
+      <span>
+        商户承担 {merchantPct}%　/　用户承担 {userPct}%
+      </span>
+      <input
+        className={locked ? 'fee-range is-locked' : 'fee-range'}
+        type="range"
+        min={0}
+        max={feePct}
+        step={1}
+        value={merchantPct}
+        disabled={locked || disabled}
+        onChange={(event) => onChange?.(Number(event.target.value))}
+      />
+    </>
+  )
+}
 
 export function ApprovalListPage() {
   const { go, setApprovalDraft } = useAdmin()
@@ -50,9 +83,9 @@ export function ApprovalListPage() {
     if (!selected) return
     setApprovalDraft({
       recordId: selected.id,
-      kind: 'general',
+      kind: 'dedicated',
       productId: DEDICATED_SKUS[0]?.id,
-      merchantFeeRate: GENERAL_FEE_RATE,
+      merchantFeeRate: FEE_RATE,
       rows: selected.users.map((row) => ({ ...row })),
       paid: false,
     })
@@ -181,12 +214,13 @@ export function ApprovalListPage() {
 export function ApprovalBuyPage() {
   const { go, approvalDraft, setApprovalDraft } = useAdmin()
   const record = approvalDraft ? approvalById(approvalDraft.recordId) : undefined
-  const [kind, setKind] = useState<PurchaseKind>(approvalDraft?.kind ?? 'general')
+  const [kind, setKind] = useState<PurchaseKind>(approvalDraft?.kind ?? 'dedicated')
   const [productId, setProductId] = useState(approvalDraft?.productId ?? DEDICATED_SKUS[0]?.id ?? 'gold')
+  const [equityOpen, setEquityOpen] = useState(false)
   const [dedicatedPct, setDedicatedPct] = useState(() =>
-    approvalDraft?.kind === 'dedicated'
-      ? Math.round((approvalDraft.merchantFeeRate ?? FEE_PCT / 100) * 100)
-      : FEE_PCT,
+    approvalDraft?.kind === 'general'
+      ? FEE_PCT
+      : Math.round((approvalDraft?.merchantFeeRate ?? FEE_RATE) * 100),
   )
 
   if (!approvalDraft || !record) {
@@ -213,7 +247,6 @@ export function ApprovalBuyPage() {
   const costAmount = plan.costAmount
   const q = quote(costAmount, merchantFeeRate, feeRateFor(kind))
   const sku = DEDICATED_SKUS.find((item) => item.id === productId)
-  const userPct = feePct - merchantPct
   const canSubmit = plan.rows.length > 0 && costAmount > 0 && !approvalDraft.paid
 
   const toCashier = () => {
@@ -262,11 +295,11 @@ export function ApprovalBuyPage() {
             <div className="field">
               <span>采购类型</span>
               <div className="seg">
-                <button type="button" className={kind === 'general' ? 'on' : ''} onClick={() => setKind('general')}>
-                  通用积分
-                </button>
                 <button type="button" className={kind === 'dedicated' ? 'on' : ''} onClick={() => setKind('dedicated')}>
                   专用券
+                </button>
+                <button type="button" className={kind === 'general' ? 'on' : ''} onClick={() => setKind('general')}>
+                  通用积分
                 </button>
               </div>
               <em>
@@ -279,20 +312,28 @@ export function ApprovalBuyPage() {
             {kind === 'dedicated' ? (
               <div className="field">
                 <span>绑定商品</span>
-                <div className="sku-pick">
-                  {DEDICATED_SKUS.map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className={productId === item.id ? 'on' : ''}
-                      onClick={() => setProductId(item.id)}
-                    >
-                      <ProductIcon id={item.id} />
-                      {dedicatedLabel(item.name)}
-                    </button>
-                  ))}
+                <div className="bound-sku">
+                  {sku ? <ProductIcon id={sku.id} /> : null}
+                  <div>
+                    <strong>{dedicatedLabel(sku?.name)}</strong>
+                    <em>一次只能绑定一种专用券</em>
+                  </div>
+                  <button className="account-btn" type="button" onClick={() => setEquityOpen(true)}>
+                    选择商品
+                  </button>
                 </div>
               </div>
+            ) : null}
+
+            {equityOpen ? (
+              <EquityPicker
+                value={productId}
+                onSelect={(id) => {
+                  setProductId(id)
+                  setEquityOpen(false)
+                }}
+                onClose={() => setEquityOpen(false)}
+              />
             ) : null}
 
             <div className="field">
@@ -319,39 +360,27 @@ export function ApprovalBuyPage() {
             </div>
 
             <label className="field">
-              <span>{kind === 'general' ? '手续费' : '手续费拆分'}</span>
+              <span>手续费拆分</span>
               {kind === 'general' ? (
-                <>
-                  <em>
-                    {costAmount > 0
-                      ? `按本次采购金额 ¥${money(costAmount)} 计，固定 ${GENERAL_FEE_PCT}%，全部由商户承担。`
-                      : `通用积分固定 ${GENERAL_FEE_PCT}%，全部由商户承担。`}
-                  </em>
-                  <span>
-                    商户承担 {GENERAL_FEE_PCT}%　/　用户承担 0%
-                  </span>
-                </>
+                <em>
+                  {costAmount > 0
+                    ? `按本次采购金额 ¥${money(costAmount)} 计，固定 ${GENERAL_FEE_PCT}%，全部由商户承担，不可调整。`
+                    : `通用积分固定 ${GENERAL_FEE_PCT}%，全部由商户承担，不可调整。`}
+                </em>
               ) : (
-                <>
-                  <em>
-                    {costAmount > 0
-                      ? `按本次采购金额 ¥${money(costAmount)} 计算 ${FEE_PCT}% 如何分配`
-                      : `按审批名单金额计算 ${FEE_PCT}% 如何分配`}
-                  </em>
-                  <span>
-                    商户承担 {merchantPct}%　/　用户承担 {userPct}%
-                  </span>
-                  <input
-                    type="range"
-                    min={0}
-                    max={FEE_PCT}
-                    step={1}
-                    value={dedicatedPct}
-                    disabled={approvalDraft.paid}
-                    onChange={(event) => setDedicatedPct(Number(event.target.value))}
-                  />
-                </>
+                <em>
+                  {costAmount > 0
+                    ? `按本次采购金额 ¥${money(costAmount)} 计算 ${FEE_PCT}% 如何分配`
+                    : `按审批名单金额计算 ${FEE_PCT}% 如何分配`}
+                </em>
               )}
+              <FeeSplitBar
+                feePct={feePct}
+                merchantPct={merchantPct}
+                locked={kind === 'general'}
+                disabled={approvalDraft.paid}
+                onChange={kind === 'dedicated' ? setDedicatedPct : undefined}
+              />
             </label>
 
             {costAmount > 0 ? (

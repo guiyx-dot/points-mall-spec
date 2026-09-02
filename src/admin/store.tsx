@@ -120,7 +120,7 @@ function applyGrants(order: AdminOrder, grants: ImportRow[], orders: AdminOrder[
 
 export function AdminProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<AdminData>(load)
-  const [screen, setScreen] = useState<AdminScreen>('catalog')
+  const [screen, setScreen] = useState<AdminScreen>('approval')
   const [issueOrderId, setIssueOrderId] = useState<string | null>(null)
   const [approvalDraft, setApprovalDraft] = useState<ApprovalDraft | null>(null)
 

@@ -714,6 +714,132 @@ input[type='range'] {
   color: #12b5b0;
 }
 
+.bound-sku {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #f7fafb;
+  border-radius: 8px;
+}
+
+.bound-sku .icon-plate {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.bound-sku .icon-svg,
+.bound-sku .brand-logo {
+  width: 22px;
+  height: 22px;
+}
+
+.bound-sku strong {
+  display: block;
+  font-size: 14px;
+}
+
+.bound-sku em {
+  display: block;
+}
+
+.bound-sku .account-btn {
+  margin-left: auto;
+}
+
+.equity-modal {
+  width: min(720px, calc(100vw - 32px));
+  padding: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.equity-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 20px;
+  border-bottom: 1px solid #f0f0f0;
+  overflow-x: auto;
+}
+
+.equity-tabs button {
+  height: 44px;
+  padding: 0 12px;
+  color: #5c656d;
+  font-size: 14px;
+  white-space: nowrap;
+  box-shadow: inset 0 -2px 0 transparent;
+}
+
+.equity-tabs button.on {
+  color: #12b5b0;
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 #12b5b0;
+}
+
+.equity-list {
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: min(56vh, 520px);
+  overflow: auto;
+}
+
+.equity-card {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  border: 1px solid #e6eaee;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.equity-card.on {
+  border-color: #12b5b0;
+}
+
+.equity-card .icon-plate {
+  width: 64px;
+  height: 64px;
+}
+
+.equity-card-body strong {
+  display: block;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.equity-metrics {
+  display: flex;
+  gap: 32px;
+  background: #f3f6f8;
+  border-radius: 4px;
+  padding: 8px 14px;
+}
+
+.equity-metrics b {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.equity-metrics span {
+  font-size: 12px;
+  color: #8a939c;
+}
+
+.fee-range.is-locked,
+.fee-range:disabled {
+  cursor: not-allowed;
+  opacity: 1;
+}
+
 .account-modal {
   width: min(920px, calc(100vw - 32px));
   padding: 0;
@@ -786,6 +912,8 @@ input[type='range'] {
   font-size: 12px;
   margin-top: 4px;
 }
+
+.pay-banner {
   background: #fff7e8;
   color: #b26200;
   border-radius: 10px;
