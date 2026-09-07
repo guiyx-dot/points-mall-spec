@@ -2,6 +2,12 @@
 
 给研发对照的静态 H5，无后端。主流程与演示版相同，细节会继续改。
 
+**对着原型看 PRD**
+- 线上：https://guiyx-dot.github.io/points-mall-spec/#/prd
+- 本地：http://127.0.0.1:5174/#/prd
+
+左边选页面，中间是原型，右边是说明。文字稿：[`docs/通用积分商城-PRD.md`](./docs/通用积分商城-PRD.md)
+
 演示版（已冻结，勿改）：https://guiyx-dot.github.io/paper-shop/
 
 ## 在线地址

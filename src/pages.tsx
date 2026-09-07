@@ -1,7 +1,8 @@
-import { USER, PRODUCTS, PRODUCT_TONES } from './data'
+import { USER, PRODUCT_TONES } from './data'
 import { NavIcon, ProductIcon } from './icons'
 import { NavBar, StatusBar } from './components'
 import { GOLD_PRODUCT_ID, useStore } from './store'
+import { pointsExpiryHint } from './points-expiry'
 import { useState, type CSSProperties } from 'react'
 import type { PayMethod, Product, Screen } from './types'
 
@@ -54,82 +55,100 @@ function ReasonTag({ product }: { product: Product }) {
   return <span className="reason-text">{reason.label}</span>
 }
 
-const LOGO_PILE = [
-  { id: 'starbucks', left: '34%', top: '14%', size: 58, z: 6, rotate: -9 },
-  { id: 'alipay', left: '18%', top: '6%', size: 50, z: 5, rotate: 12 },
-  { id: 'wechat', left: '52%', top: '2%', size: 48, z: 4, rotate: -7 },
-  { id: 'takeout', left: '6%', top: '34%', size: 46, z: 5, rotate: 14 },
-  { id: 'jd', left: '58%', top: '30%', size: 54, z: 7, rotate: 8 },
-  { id: 'gold', left: '40%', top: '46%', size: 42, z: 8, rotate: -5 },
-  { id: 'ride', left: '72%', top: '10%', size: 42, z: 3, rotate: -16 },
-  { id: 'movie', left: '68%', top: '50%', size: 40, z: 5, rotate: 7 },
-  { id: 'video', left: '16%', top: '58%', size: 38, z: 4, rotate: -11 },
-  { id: 'market', left: '2%', top: '6%', size: 34, z: 2, rotate: 18 },
-  { id: 'hotel', left: '82%', top: '38%', size: 36, z: 2, rotate: -10 },
-  { id: 'hotpot', left: '30%', top: '64%', size: 36, z: 3, rotate: 15 },
-  { id: 'digital', left: '84%', top: '4%', size: 32, z: 1, rotate: 22 },
-] as const
-
-export function ClaimPage() {
-  const { pendingAmount, pendingCount, claimPending, hasEverClaimed, go } = useStore()
+export function MemberPage() {
+  const { go, goldBalance, coupons } = useStore()
+  const [hide, setHide] = useState(false)
+  const goldText = hide ? '****' : Number(goldBalance).toFixed(2)
+  const perkCount = hide ? '**' : String(coupons.length)
+  const corpText = hide ? '****' : '0.00'
 
   return (
-    <div className="page claim-page">
-      <StatusBar />
-      <div className="claim-hero">
-        <div className="orb orb-a" />
-        <div className="orb orb-b" />
-        <div className="claim-kicker">会员积分待领取</div>
-        <div className="claim-amount">
-          {pendingAmount}
-          <span>分</span>
+    <div className="page member-page">
+      <div className="member-hero">
+        <StatusBar />
+        <div className="member-nav">
+          <span className="member-nav-title">会员服务</span>
+          <div className="member-nav-tools" aria-hidden="true">
+            <span>☆</span>
+            <span>⋯</span>
+            <span>○</span>
+          </div>
         </div>
-        <div className="claim-sub">
-          {pendingCount > 1 ? `共 ${pendingCount} 笔发放，领取后合并入账` : '领取后可前往积分商城兑换精选好礼'}
-        </div>
-      </div>
-      <div className="claim-sheet">
-        <div className="sheet-title">领取后可兑好物</div>
-        <div className="logo-pile" aria-hidden="true">
-          {LOGO_PILE.map((item) => (
-            <div
-              key={item.id}
-              className="logo-chip"
-              style={{
-                left: item.left,
-                top: item.top,
-                width: item.size,
-                height: item.size,
-                zIndex: item.z,
-                transform: `rotate(${item.rotate}deg)`,
-              }}
-            >
-              <ProductIcon id={item.id} />
+        <div className="member-center-card">
+          <div>
+            <h2>支车宝会员中心</h2>
+            <div className="member-user">
+              <span className="member-avatar">{USER.name.slice(0, 1)}</span>
+              <span>{USER.name}</span>
+              <span className="member-info-pill">个人信息 ›</span>
             </div>
-          ))}
+          </div>
+          <div className="member-gem" aria-hidden="true" />
         </div>
-        <p className="pile-caption">精选品牌好物，领完即可兑换</p>
-        <button className="btn-primary" onClick={claimPending} disabled={pendingAmount <= 0}>
-          {pendingAmount > 0 ? '立即领取' : '暂无待领取积分'}
-        </button>
-        {hasEverClaimed ? (
-          <button className="btn-text" onClick={() => go({ name: 'mall' })}>
-            返回商城
-          </button>
-        ) : (
-          <p className="claim-note">领取后即可进入积分商城</p>
-        )}
       </div>
+
+      <section className="member-mall">
+        <button className="mall-banner" type="button" onClick={() => go({ name: 'mall' })}>
+          <div className="mall-banner-copy">
+            <span className="mall-banner-kicker">品牌好物 · 专用券</span>
+            <strong>积分商城</strong>
+            <span className="mall-banner-sub">兑换星巴克、立减金与通用金</span>
+            <span className="mall-banner-go">进入 ›</span>
+          </div>
+          <div className="mall-banner-visual" aria-hidden="true">
+            <span className="mall-chip mall-chip-a">
+              <ProductIcon id="starbucks" />
+            </span>
+            <span className="mall-chip mall-chip-b">
+              <ProductIcon id="wechat" />
+            </span>
+            <span className="mall-chip mall-chip-c">
+              <ProductIcon id="alipay" />
+            </span>
+            <span className="mall-chip mall-chip-d">
+              <ProductIcon id="gold" />
+            </span>
+          </div>
+        </button>
+      </section>
+
+      <section className="member-perks">
+        <div className="member-perks-head">
+          <h3>专属福利</h3>
+          <button type="button" className="member-eye" onClick={() => setHide((v) => !v)}>
+            {hide ? '隐藏' : '显示'}
+          </button>
+        </div>
+        <div className="perk-grid">
+          <button className="perk-card perk-gold" type="button" onClick={() => go({ name: 'gold-wallet' })}>
+            <div className="perk-gold-label">通用金</div>
+            <div className="perk-coin" aria-hidden="true" />
+            <p>您的专属积分</p>
+            <strong>{goldText}</strong>
+            <span className="perk-more">去使用 ›</span>
+          </button>
+          <button className="perk-card perk-lite" type="button" onClick={() => go({ name: 'my-benefits' })}>
+            <div className="perk-lite-title">我的权益</div>
+            <b>{perkCount} 项</b>
+            <span className="perk-more">去使用 ›</span>
+          </button>
+          <div className="perk-card perk-lite">
+            <div className="perk-lite-title">因公付</div>
+            <b>¥ {corpText}</b>
+            <span className="perk-more">查看更多</span>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
 
 export function MallPage() {
-  const { points, go, pendingAmount, pendingCount, generalPoints, goldBalance, couponTotal } = useStore()
+  const { points, go, nearestExpire, generalPoints, goldBalance, couponTotal, catalog } = useStore()
   const [category, setCategory] = useState<'all' | 'dining' | 'life' | 'travel'>('all')
 
-  const benefitList = PRODUCTS.filter((item) => item.zone === 'benefit')
-  const pointsList = PRODUCTS.filter((item) => {
+  const benefitList = catalog.filter((item) => item.zone === 'benefit')
+  const pointsList = catalog.filter((item) => {
     if (item.zone !== 'points') return false
     if (category !== 'all' && item.category !== category) return false
     return true
@@ -138,17 +157,14 @@ export function MallPage() {
   return (
     <div className="page mall-page">
       <StatusBar />
-      <NavBar title="积分兑换商城" />
+      <NavBar title="积分兑换商城" onBack={() => go({ name: 'member' })} />
       <div className="mall-balance">
-        <span>当前会员积分</span>
-        <strong>{points}</strong>
+        <div className="mall-balance-row">
+          <span>当前会员积分</span>
+          <strong>{points}</strong>
+        </div>
+        <p className="mall-balance-expire">{pointsExpiryHint(nearestExpire)}</p>
       </div>
-      {pendingCount > 0 ? (
-        <button className="pending-banner" onClick={() => go({ name: 'claim' })}>
-          您还有 {pendingAmount} 积分待领取
-          <span>去领取</span>
-        </button>
-      ) : null}
 
       <section className="mall-section">
         <div className="mall-section-head">
@@ -333,7 +349,7 @@ export function DetailPage({ productId }: { productId: string }) {
       <div className="bottom-cta">
         {benefitFinished ? (
           <button className="btn-primary" type="button" onClick={() => openBenefitAsset(go, product.id)}>
-            查看权益
+            去使用
           </button>
         ) : !canAny ? (
           <button className="btn-primary is-disabled" disabled>
@@ -551,7 +567,7 @@ export function SuccessPage({ orderId }: { orderId: string }) {
             type="button"
             onClick={() => openBenefitAsset(go, order.productId, order.id)}
           >
-            查看权益
+            去使用
           </button>
         ) : null}
         <button
@@ -718,12 +734,12 @@ export function RightsPage({ fromOrderId }: { fromOrderId?: string }) {
 }
 
 export function MinePage() {
-  const { points, go, ledger, pendingAmount, pendingCount, reset, goldBalance, coupons, couponTotal } = useStore()
+  const { points, go, ledger, nearestExpire, reset, goldBalance, coupons, couponTotal } = useStore()
 
   return (
     <div className="page mine-page">
       <StatusBar />
-      <NavBar title="会员" />
+      <NavBar title="会员" onBack={() => go({ name: 'member' })} />
       <div className="user-row">
         <div className="avatar">{USER.name.slice(0, 1)}</div>
         <div>
@@ -755,17 +771,12 @@ export function MinePage() {
         ) : goldBalance > 0 ? (
           <div className="voucher-line">通用金可在积分专区作为余额支付</div>
         ) : null}
+        <div className="voucher-line">{pointsExpiryHint(nearestExpire)}</div>
       </div>
       <div className="corp-card">
         <span className="ok">✓</span>
         {USER.corp}
       </div>
-      {pendingCount > 0 ? (
-        <button className="pending-banner" onClick={() => go({ name: 'claim' })}>
-          您还有 {pendingAmount} 积分待领取
-          <span>去领取</span>
-        </button>
-      ) : null}
       <button className="plain-card" onClick={() => go({ name: 'records' })}>
         <div>
           <div className="plain-title">兑换记录</div>
@@ -811,14 +822,18 @@ export function RecordsPage() {
               <div className="ledger-title">{item.productName}</div>
               <div className="ledger-time">
                 {item.time} · {item.id}
-                {item.payWith === 'gold'
-                  ? ' · 通用金'
-                  : item.payWith === 'coupon'
-                    ? ` · ${item.payLabel ?? '券'}`
-                    : ' · 积分'}
+                {item.status === 'refunded'
+                  ? ' · 已退款'
+                  : item.payWith === 'gold'
+                    ? ' · 通用金'
+                    : item.payWith === 'coupon'
+                      ? ` · ${item.payLabel ?? '券'}`
+                      : ' · 积分'}
               </div>
             </div>
-            <strong className="accent">-{item.cost}</strong>
+            <strong className={item.status === 'refunded' ? 'plus' : 'accent'}>
+              {item.status === 'refunded' ? `+${item.cost}` : `-${item.cost}`}
+            </strong>
           </button>
         ))}
       </div>

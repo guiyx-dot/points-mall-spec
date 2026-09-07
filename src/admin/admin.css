@@ -59,8 +59,14 @@
   cursor: default;
 }
 
-.side-consumer {
+.side-foot {
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.side-consumer {
   padding: 10px 12px;
   color: #12b5b0;
   font-size: 13px;
@@ -277,6 +283,16 @@
   font-style: normal;
   color: #9aa3ab;
   font-size: 12px;
+}
+
+.field input,
+.field select {
+  height: 40px;
+  border: 1px solid #e6eaee;
+  border-radius: 8px;
+  padding: 0 12px;
+  font: inherit;
+  background: #fff;
 }
 
 .field textarea {
@@ -1002,6 +1018,248 @@ input[type='range'] {
 
 @media (max-width: 1100px) {
   .cashier-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.tab-count {
+  margin-left: 6px;
+  font-style: normal;
+  font-size: 12px;
+  color: #8a939c;
+}
+
+.admin-tabs button.on .tab-count {
+  color: #12b5b0;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f3f5f7;
+  color: #8a939c;
+  font-size: 12px;
+}
+
+.status-pill.on {
+  background: #e9f8f4;
+  color: #0f8a72;
+}
+
+.goods-config-table .icon-plate,
+.member-detail .icon-plate {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.goods-config-table .icon-svg,
+.goods-config-table .brand-logo,
+.member-detail .icon-svg,
+.member-detail .brand-logo {
+  width: 22px;
+  height: 22px;
+}
+
+.goods-modal {
+  width: min(640px, calc(100vw - 32px));
+  padding: 0;
+  overflow: hidden;
+}
+
+.goods-form {
+  padding: 16px 20px 8px;
+  max-height: min(70vh, 640px);
+  overflow: auto;
+}
+
+.goods-form-hero {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.goods-form-hero .icon-plate {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+}
+
+.goods-form-hero p {
+  color: #8a939c;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.goods-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+}
+
+.shelf-field {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.shelf-field input {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+}
+
+.goods-form-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 20px 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.member-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.95fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.member-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0 8px;
+}
+
+.member-search input {
+  flex: 1;
+  height: 40px;
+  border: 1px solid #e6eaee;
+  border-radius: 8px;
+  padding: 0 12px;
+  font: inherit;
+}
+
+.member-search span {
+  color: #8a939c;
+  font-size: 12px;
+}
+
+.admin-table tr.is-selected td {
+  background: #f3fbfb;
+}
+
+.muted-line {
+  color: #8a939c;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.member-detail-head h2 {
+  font-size: 18px;
+}
+
+.member-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0 8px;
+}
+
+.member-stat-grid.is-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.member-stat-grid.is-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 420px;
+}
+
+.member-stat-grid div {
+  background: #f7fafb;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.member-stat-grid span {
+  display: block;
+  color: #8a939c;
+  font-size: 12px;
+}
+
+.member-stat-grid b {
+  font-size: 18px;
+  color: #12b5b0;
+}
+
+.member-ops {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto;
+  gap: 10px;
+  align-items: end;
+  margin: 16px 0 8px;
+}
+
+.member-ops label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: #8a939c;
+}
+
+.member-ops input {
+  height: 40px;
+  border: 1px solid #e6eaee;
+  border-radius: 8px;
+  padding: 0 12px;
+  font: inherit;
+  color: #2b2f33;
+}
+
+.member-block-title {
+  margin: 20px 0 8px;
+  font-size: 14px;
+}
+
+.member-expire-note {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #8a939c;
+}
+
+.expire-warn {
+  color: #c45c00;
+}
+
+.expire-soon {
+  color: #c45c00;
+  font-weight: 600;
+}
+
+.refund-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+@media (max-width: 1100px) {
+  .member-layout,
+  .goods-form-grid,
+  .member-ops,
+  .member-stat-grid {
     grid-template-columns: 1fr;
   }
 }

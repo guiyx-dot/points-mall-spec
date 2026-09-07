@@ -464,7 +464,7 @@ export function ApprovalPayPage() {
         <span> / 收银台</span>
       </div>
       <div className={paid ? 'pay-banner is-ok' : 'pay-banner'}>
-        {paid ? '支付成功，权益已发放至审批用户，可到用户端领取。' : '提交成功，请尽快完成付款。超时未支付订单将自动关闭。'}
+        {paid ? '支付成功，权益已发放至审批用户，打开用户端即可兑换使用。' : '提交成功，请尽快完成付款。超时未支付订单将自动关闭。'}
       </div>
       <div className="cashier-grid">
         <div className="admin-panel">

@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
-import { CONSUMER_KEY, formatTime } from '../store'
-import type { Grant } from '../types'
+import { creditIssuedRows, formatTime } from '../store'
+import { pointsExpireDate } from '../points-expiry'
 import {
   DEMO_PHONE,
   issuePerUser,
@@ -73,24 +73,18 @@ function nameFor(index: number, phone: string) {
 function pushConsumerGrants(rows: IssuedUser[]) {
   const demo = rows.filter((row) => row.phone.replace(/\D/g, '') === DEMO_PHONE)
   if (demo.length === 0) return
-  let persisted: { grants?: Grant[] }
-  try {
-    persisted = JSON.parse(sessionStorage.getItem(CONSUMER_KEY) || 'null') || {}
-  } catch {
-    persisted = {}
-  }
-  const grants: Grant[] = Array.isArray(persisted.grants) ? persisted.grants : []
-  const extra: Grant[] = demo.map((row) => ({
-    id: `mg-${row.id}`,
-    title: row.kind === 'general' ? '通用积分发放' : `${row.productName}发放`,
-    amount: row.points,
-    claimed: false,
-    kind: row.kind,
-    productId: row.productId,
-    userFeeRate: row.userFeeRate,
-  }))
-  sessionStorage.setItem(CONSUMER_KEY, JSON.stringify({ ...persisted, grants: [...grants, ...extra] }))
-  window.dispatchEvent(new Event('points-mall-sync'))
+  creditIssuedRows(
+    demo.map((row) => ({
+      id: row.id,
+      points: row.points,
+      kind: row.kind,
+      productId: row.productId,
+      productName: row.productName,
+      userFeeRate: row.userFeeRate,
+      expireDate: row.expireDate ?? pointsExpireDate(),
+      title: row.kind === 'general' ? '通用积分发放' : `${row.productName}发放`,
+    })),
+  )
 }
 
 function applyGrants(order: AdminOrder, grants: ImportRow[], orders: AdminOrder[], users: IssuedUser[]) {
@@ -104,7 +98,8 @@ function applyGrants(order: AdminOrder, grants: ImportRow[], orders: AdminOrder[
     productId: order.productId,
     productName: order.productName,
     userFeeRate: order.userFeeRate,
-    claimed: false,
+    claimed: true,
+    expireDate: pointsExpireDate(),
   }))
   const issued = rows.reduce((sum, row) => sum + row.points, 0)
   return {
@@ -118,15 +113,25 @@ function applyGrants(order: AdminOrder, grants: ImportRow[], orders: AdminOrder[
   }
 }
 
-export function AdminProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<AdminData>(load)
-  const [screen, setScreen] = useState<AdminScreen>('approval')
+export function AdminProvider({
+  children,
+  isolated,
+  initialScreen,
+  initialDraft,
+}: {
+  children: ReactNode
+  isolated?: boolean
+  initialScreen?: AdminScreen
+  initialDraft?: ApprovalDraft | null
+}) {
+  const [data, setData] = useState<AdminData>(() => (isolated ? empty() : load()))
+  const [screen, setScreen] = useState<AdminScreen>(initialScreen ?? 'approval')
   const [issueOrderId, setIssueOrderId] = useState<string | null>(null)
-  const [approvalDraft, setApprovalDraft] = useState<ApprovalDraft | null>(null)
+  const [approvalDraft, setApprovalDraft] = useState<ApprovalDraft | null>(initialDraft ?? null)
 
   const persist = (next: AdminData) => {
     setData(next)
-    sessionStorage.setItem(ADMIN_KEY, JSON.stringify(next))
+    if (!isolated) sessionStorage.setItem(ADMIN_KEY, JSON.stringify(next))
   }
 
   const go = (next: AdminScreen, orderId: string | null = issueOrderId) => {
@@ -157,7 +162,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     if (input.grants && input.grants.length > 0) {
       const applied = applyGrants(order, input.grants, orders, data.users)
       persist(applied.next)
-      pushConsumerGrants(applied.rows)
+      if (!isolated) pushConsumerGrants(applied.rows)
       if (input.source === 'approval') {
         setApprovalDraft((prev) => (prev ? { ...prev, paid: true, orderId: order.id } : prev))
         setScreen('approval-pay')
@@ -197,7 +202,8 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       productId: order.productId,
       productName: order.productName,
       userFeeRate: order.userFeeRate,
-      claimed: false,
+      claimed: true,
+      expireDate: pointsExpireDate(),
     }))
     persist({
       orders: data.orders.map((item) =>
@@ -205,7 +211,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       ),
       users: [...rows, ...data.users],
     })
-    pushConsumerGrants(rows)
+    if (!isolated) pushConsumerGrants(rows)
     setScreen('users')
     return rows
   }

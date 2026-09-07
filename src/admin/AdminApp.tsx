@@ -1,5 +1,7 @@
 import { AdminProvider, useAdmin } from './store'
 import { ApprovalBuyPage, ApprovalListPage, ApprovalPayPage } from './approval'
+import { MembersPage } from './members'
+import { RedeemsPage } from './redemptions'
 import './admin.css'
 
 const MUTED = ['活动管理', '额度管理', '车险报价管理', '运管家', '订单管理', '数据中心', '用户中心']
@@ -17,6 +19,13 @@ function Shell() {
         <button className="side-item muted" type="button">
           首页
         </button>
+        <div className="side-group">积分商城</div>
+        <button className={screen === 'members' ? 'side-item on' : 'side-item'} type="button" onClick={() => go('members')}>
+          用户积分
+        </button>
+        <button className={screen === 'redeems' ? 'side-item on' : 'side-item'} type="button" onClick={() => go('redeems')}>
+          兑换订单
+        </button>
         <div className="side-group">审批管理</div>
         <button
           className={isApprovalScreen(screen) ? 'side-item on' : 'side-item'}
@@ -33,14 +42,23 @@ function Shell() {
             {label}
           </button>
         ))}
-        <a className="side-consumer" href="#/">
-          打开用户端
-        </a>
+        <div className="side-foot">
+          <a className="side-consumer" href="#/prd">
+            PRD 对照
+          </a>
+          <a className="side-consumer" href="#/">
+            打开用户端
+          </a>
+        </div>
       </aside>
       <main className="admin-main">
+        {screen === 'members' ? <MembersPage /> : null}
+        {screen === 'redeems' ? <RedeemsPage /> : null}
         {screen === 'approval-buy' ? <ApprovalBuyPage /> : null}
         {screen === 'approval-pay' ? <ApprovalPayPage /> : null}
-        {screen !== 'approval-buy' && screen !== 'approval-pay' ? <ApprovalListPage /> : null}
+        {screen === 'approval' || (!isApprovalScreen(screen) && screen !== 'members' && screen !== 'redeems') ? (
+          <ApprovalListPage />
+        ) : null}
       </main>
     </div>
   )

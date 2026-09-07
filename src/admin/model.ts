@@ -1,3 +1,4 @@
+import { loadCatalog } from '../catalog'
 import { PRODUCTS } from '../data'
 import type { Product } from '../types'
 
@@ -47,9 +48,21 @@ export type IssuedUser = {
   productName: string
   userFeeRate: number
   claimed: boolean
+  expireDate?: string
 }
 
-export type AdminScreen = 'catalog' | 'buy' | 'orders' | 'issue' | 'users' | 'approval' | 'approval-buy' | 'approval-pay'
+export type AdminScreen =
+  | 'catalog'
+  | 'buy'
+  | 'orders'
+  | 'issue'
+  | 'users'
+  | 'goods'
+  | 'members'
+  | 'redeems'
+  | 'approval'
+  | 'approval-buy'
+  | 'approval-pay'
 
 export function money(n: number) {
   return n.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -62,7 +75,7 @@ export function maskPhone(phone: string) {
 }
 
 export function skuById(id: string): Product | undefined {
-  return PRODUCTS.find((item) => item.id === id)
+  return loadCatalog().find((item) => item.id === id) ?? PRODUCTS.find((item) => item.id === id)
 }
 
 export const FEE_PCT = Math.round(FEE_RATE * 100)

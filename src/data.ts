@@ -1,3 +1,4 @@
+import { pointsExpireDate } from './points-expiry'
 import type { Grant, Product } from './types'
 
 export const USER = {
@@ -7,16 +8,9 @@ export const USER = {
 }
 
 export const INITIAL_GRANTS: Grant[] = [
-  { id: 'g1', title: '会员积分发放', amount: 5500, claimed: false },
-  { id: 'g2', title: '补充积分发放', amount: 2000, claimed: false },
+  { id: 'g1', title: '会员积分发放', amount: 5500, claimed: true, expireDate: pointsExpireDate() },
+  { id: 'g2', title: '补充积分发放', amount: 2000, claimed: true, expireDate: pointsExpireDate() },
 ]
-
-export const FOLLOW_UP_GRANT: Grant = {
-  id: 'g3',
-  title: '新增积分发放',
-  amount: 800,
-  claimed: false,
-}
 
 export const PRODUCTS: Product[] = [
   {

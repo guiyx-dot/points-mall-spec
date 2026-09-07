@@ -1,57 +1,27 @@
 import { useEffect, useState } from 'react'
-import { StoreProvider, useStore } from './store'
-import { ClaimPage, DetailPage, GoldWalletPage, MallPage, MinePage, RecordsPage, RightsPage, SuccessPage, TabBar } from './pages'
 import AdminApp from './admin/AdminApp'
+import PrdApp from './prd/PrdApp'
+import { ConsumerApp } from './shell'
 
-function useAdminHash() {
-  const [admin, setAdmin] = useState(() => window.location.hash.startsWith('#/admin'))
+function useHashMode() {
+  const read = () => {
+    const hash = window.location.hash
+    if (hash.startsWith('#/prd')) return 'prd' as const
+    if (hash.startsWith('#/admin')) return 'admin' as const
+    return 'app' as const
+  }
+  const [mode, setMode] = useState(read)
   useEffect(() => {
-    const onHash = () => setAdmin(window.location.hash.startsWith('#/admin'))
+    const onHash = () => setMode(read())
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
-  return admin
-}
-
-function Screen() {
-  const { screen, hasEverClaimed } = useStore()
-  if (!hasEverClaimed) return <ClaimPage />
-  if (screen.name === 'claim') return <ClaimPage />
-  if (screen.name === 'detail') return <DetailPage productId={screen.productId} />
-  if (screen.name === 'success') return <SuccessPage orderId={screen.orderId} />
-  if (screen.name === 'gold-wallet') return <GoldWalletPage fromOrderId={screen.fromOrderId} />
-  if (screen.name === 'my-benefits') return <RightsPage fromOrderId={screen.fromOrderId} />
-  if (screen.name === 'mine') return <MinePage />
-  if (screen.name === 'records') return <RecordsPage />
-  return <MallPage />
-}
-
-function PhoneShell() {
-  const { screen, hasEverClaimed } = useStore()
-  const showTab = hasEverClaimed && (screen.name === 'mall' || screen.name === 'mine')
-  return (
-    <>
-      <div className="phone-body">
-        <Screen />
-      </div>
-      {showTab ? <TabBar current={screen.name === 'mine' ? 'mine' : 'mall'} /> : null}
-    </>
-  )
+  return mode
 }
 
 export default function App() {
-  const admin = useAdminHash()
-  if (admin) return <AdminApp />
-  return (
-    <div className="stage">
-      <a className="admin-entry" href="#/admin">
-        商户后台
-      </a>
-      <div className="phone">
-        <StoreProvider>
-          <PhoneShell />
-        </StoreProvider>
-      </div>
-    </div>
-  )
+  const mode = useHashMode()
+  if (mode === 'prd') return <PrdApp />
+  if (mode === 'admin') return <AdminApp />
+  return <ConsumerApp />
 }
