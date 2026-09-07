@@ -1,4 +1,4 @@
-import { DEMO_PHONE, maskPhone } from './model'
+import { DEMO_PHONE, maskPhone, type IssuedUser } from './model'
 import { peekConsumer } from '../store'
 import { loadCatalog } from '../catalog'
 import { useAdmin } from './store'
@@ -126,10 +126,7 @@ export type MemberRow = MemberBook & {
   live: boolean
 }
 
-export function buildMemberRows(
-  books: MemberBook[],
-  users: { phone: string; name: string; points: number; kind: 'general' | 'dedicated'; claimed: boolean; id: string }[],
-): MemberRow[] {
+export function buildMemberRows(books: MemberBook[], users: IssuedUser[]): MemberRow[] {
   const live = demoBook()
   const nameByPhone = new Map<string, string>()
   for (const item of users) {

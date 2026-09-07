@@ -40,14 +40,6 @@ function benefitLocked(quotas: Record<string, number>, catalog = loadCatalog()) 
   return sum
 }
 
-function emptyQuotas(catalog = loadCatalog()) {
-  const quotas: Record<string, number> = {}
-  for (const product of catalog) {
-    if (product.zone === 'benefit') quotas[product.id] = 0
-  }
-  return quotas
-}
-
 function seedBenefitQuotas(catalog = loadCatalog()) {
   const quotas: Record<string, number> = {}
   for (const product of catalog) {
