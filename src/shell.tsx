@@ -1,5 +1,5 @@
 import { StoreProvider, useStore } from './store'
-import { DetailPage, GoldWalletPage, MallPage, MemberPage, MinePage, RecordsPage, RightsPage, SuccessPage, TabBar } from './pages'
+import { DetailPage, GoldWalletPage, MallPage, MemberPage, MinePage, PointsZonePage, RecordsPage, RightsPage, SuccessPage, TabBar } from './pages'
 
 export function Screen() {
   const { screen } = useStore()
@@ -10,6 +10,7 @@ export function Screen() {
   if (screen.name === 'mine') return <MinePage />
   if (screen.name === 'records') return <RecordsPage />
   if (screen.name === 'mall') return <MallPage />
+  if (screen.name === 'points-zone') return <PointsZonePage />
   return <MemberPage />
 }
 

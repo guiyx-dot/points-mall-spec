@@ -7,6 +7,7 @@ export type Screen =
   | { name: 'member' }
   | { name: 'claim' }
   | { name: 'mall' }
+  | { name: 'points-zone' }
   | { name: 'detail'; productId: string }
   | { name: 'success'; orderId: string }
   | { name: 'gold-wallet'; fromOrderId?: string }

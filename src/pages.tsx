@@ -144,15 +144,8 @@ export function MemberPage() {
 }
 
 export function MallPage() {
-  const { points, go, nearestExpire, generalPoints, goldBalance, couponTotal, catalog } = useStore()
-  const [category, setCategory] = useState<'all' | 'dining' | 'life' | 'travel'>('all')
-
+  const { points, go, nearestExpire, catalog } = useStore()
   const benefitList = catalog.filter((item) => item.zone === 'benefit')
-  const pointsList = catalog.filter((item) => {
-    if (item.zone !== 'points') return false
-    if (category !== 'all' && item.category !== category) return false
-    return true
-  })
 
   return (
     <div className="page mall-page">
@@ -182,32 +175,77 @@ export function MallPage() {
       <section className="mall-section">
         <div className="mall-section-head">
           <h2>积分专区</h2>
-          <p>{zonePayHint(generalPoints, goldBalance, couponTotal)}</p>
         </div>
-        <div className="cat-row">
-          {[
+        <button className="zone-entry" type="button" onClick={() => go({ name: 'points-zone' })}>
+          <div className="zone-entry-copy">
+            <span className="zone-entry-kicker">福多多提供</span>
+            <strong>积分专区</strong>
+            <span className="zone-entry-sub">星巴克、外卖、出行等品牌好物，用通用积分、通用金或券兑换</span>
+            <span className="zone-entry-go">进入 ›</span>
+          </div>
+          <div className="mall-banner-visual" aria-hidden="true">
+            <span className="mall-chip mall-chip-a">
+              <ProductIcon id="starbucks" />
+            </span>
+            <span className="mall-chip mall-chip-b">
+              <ProductIcon id="takeout" />
+            </span>
+            <span className="mall-chip mall-chip-c">
+              <ProductIcon id="ride" />
+            </span>
+            <span className="mall-chip mall-chip-d">
+              <ProductIcon id="video" />
+            </span>
+          </div>
+        </button>
+      </section>
+    </div>
+  )
+}
+
+export function PointsZonePage() {
+  const { go, nearestExpire, generalPoints, goldBalance, couponTotal, catalog } = useStore()
+  const [category, setCategory] = useState<'all' | 'dining' | 'life' | 'travel'>('all')
+  const pointsList = catalog.filter((item) => {
+    if (item.zone !== 'points') return false
+    if (category !== 'all' && item.category !== category) return false
+    return true
+  })
+
+  return (
+    <div className="page fuduo-page">
+      <StatusBar />
+      <NavBar title="积分专区" onBack={() => go({ name: 'mall' })} />
+      <div className="fuduo-bar">本页嵌入福多多 H5，商品与履约由对方提供</div>
+      <div className="mall-balance">
+        <div className="mall-balance-row">
+          <span>可用积分</span>
+          <strong>{generalPoints}</strong>
+        </div>
+        <p className="mall-balance-expire">{zonePayHint(generalPoints, goldBalance, couponTotal)}</p>
+        <p className="mall-balance-expire">{pointsExpiryHint(nearestExpire)}</p>
+      </div>
+      <div className="cat-row">
+        {(
+          [
             ['all', '全部'],
             ['dining', '餐饮'],
             ['life', '生活'],
             ['travel', '出行'],
-          ].map(([id, label]) => (
-            <button
-              key={id}
-              className={category === id ? 'cat on' : 'cat'}
-              onClick={() => setCategory(id as typeof category)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className="product-grid">
-          {pointsList.map((item) => (
-            <button key={item.id} className="product-card" onClick={() => go({ name: 'detail', productId: item.id })}>
-              <ProductCardBody product={item} />
-            </button>
-          ))}
-        </div>
-      </section>
+          ] as const
+        ).map(([id, label]) => (
+          <button key={id} className={category === id ? 'cat on' : 'cat'} onClick={() => setCategory(id)}>
+            {label}
+          </button>
+        ))}
+      </div>
+      <div className="product-grid is-zone">
+        {pointsList.map((item) => (
+          <button key={item.id} className="product-card" onClick={() => go({ name: 'detail', productId: item.id })}>
+            <ProductCardBody product={item} />
+          </button>
+        ))}
+      </div>
     </div>
   )
 }
@@ -233,6 +271,10 @@ function ProductCardBody({ product }: { product: Product }) {
       </div>
     </div>
   )
+}
+
+function backFromProduct(product?: Product | null): Screen {
+  return product?.zone === 'points' ? { name: 'points-zone' } : { name: 'mall' }
 }
 
 function openBenefitAsset(go: (screen: Screen) => void, productId: string, fromOrderId?: string) {
@@ -283,7 +325,7 @@ export function DetailPage({ productId }: { productId: string }) {
   return (
     <div className="page detail-page">
       <StatusBar />
-      <NavBar title="商品详情" onBack={() => go({ name: 'mall' })} />
+      <NavBar title="商品详情" onBack={() => go(backFromProduct(product))} />
       <div className="hero-block">
         <ProductIcon id={product.id} />
         <h2>{product.name}</h2>
@@ -508,7 +550,7 @@ export function SuccessPage({ orderId }: { orderId: string }) {
       <StatusBar />
       <NavBar
         title="兑换详情"
-        onBack={() => go({ name: 'mall' })}
+        onBack={() => go(backFromProduct(product))}
         right={
           <button className="nav-text" onClick={() => go({ name: 'records' })}>
             记录
@@ -572,9 +614,9 @@ export function SuccessPage({ orderId }: { orderId: string }) {
         ) : null}
         <button
           className={product?.zone === 'benefit' || (order.received ?? 0) > 0 ? 'btn-text' : 'btn-primary'}
-          onClick={() => go({ name: 'mall' })}
+          onClick={() => go(backFromProduct(product))}
         >
-          返回商城
+          {product?.zone === 'points' ? '返回积分专区' : '返回商城'}
         </button>
       </div>
     </div>
